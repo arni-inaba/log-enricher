@@ -1,13 +1,10 @@
-import datetime
 import logging
 import logging.config
-import platform
 import sys
-import threading
 
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
-from .enrichers import Enricher, ConfigProperty, Host, Thread, Timestamp
+from .enrichers import Enricher, ConfigProperty, Host, Thread, Timestamp  # noqa: F401
 
 
 class ContextFilter(logging.Filter):
@@ -29,7 +26,7 @@ class ContextFilter(logging.Filter):
         return True
 
 
-def default_enrichers(config: Dict) -> List[Enricher]:
+def default_enrichers(config: Dict) -> List[Callable[[], Dict[str, Any]]]:
     return [
         ConfigProperty(config, 'app_version'),
         ConfigProperty(config, 'release_stage'),
@@ -39,12 +36,10 @@ def default_enrichers(config: Dict) -> List[Enricher]:
     ]
 
 
-def make_config(config: Dict, enrichers: Optional[List[Callable]] = None) -> Dict:
+def make_config(config: Dict, enrichers: Optional[List[Callable[[], Dict[str, Any]]]] = None) -> Dict:
     if enrichers is None:
         enrichers = []
 
-    handlers = ["plain"] if config.get("log_mode") == "PLAIN" else ["structured"]
-    log_level = config.get("log_level", "INFO")
     return {
         "version": 1,
         "formatters": {
@@ -67,8 +62,10 @@ def make_config(config: Dict, enrichers: Optional[List[Callable]] = None) -> Dic
 
 
 def initialize_logging(config: Dict, enrichers: Optional[List[Callable]] = None) -> None:
+    handlers = ["plain"] if config.get("log_mode") == "PLAIN" else ["structured"]
+    log_level = config.get("log_level", "INFO")
     logging_config = make_config(config, enrichers)
-    for logger in config.get("loggers"):
+    for logger in config.get("loggers", []):
         logging_config["loggers"][logger] = {"handlers": handlers, "level": log_level, "propagate": False}
     logging.config.dictConfig(logging_config)
     logging.captureWarnings(True)
