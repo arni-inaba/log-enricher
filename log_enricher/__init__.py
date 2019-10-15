@@ -22,7 +22,7 @@ class ContextFilter(logging.Filter):
 
     def filter(self, record):
         for enricher in self._enrichers:
-            props = enricher.get()
+            props = enricher()
             for attr, value in props.items():
                 setattr(record, attr, value)
 

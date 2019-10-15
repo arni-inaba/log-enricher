@@ -9,7 +9,7 @@ from typing import Dict, Any
 
 class Enricher(ABC):
     @abstractmethod
-    def get(self) -> Dict[str, Any]:
+    def __call__(self) -> Dict[str, Any]:
         raise NotImplementedError
 
 
@@ -18,17 +18,17 @@ class ConfigProperty(Enricher):
         self.config = config
         self.key = key
 
-    def get(self) -> Dict[str, Any]:
+    def __call__(self) -> Dict[str, Any]:
         return {self.key: self.config.get(self.key)}
 
 
 class Host(Enricher):
-    def get(self) -> Dict[str, Any]:
+    def __call__(self) -> Dict[str, Any]:
         return {'host': platform.node()}
 
 
 class Thread(Enricher):
-    def get(self) -> Dict[str, Any]:
+    def __call__(self) -> Dict[str, Any]:
         return {'thread_id': threading.current_thread().getName()}
 
 
@@ -42,5 +42,5 @@ class Timestamp(Enricher):
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
-    def get(self) -> Dict[str, Any]:
+    def __call__(self) -> Dict[str, Any]:
         return {'timestamp': datetime.datetime.now().isoformat(**self.kwargs)}
