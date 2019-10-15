@@ -5,34 +5,16 @@ import platform
 import sys
 import threading
 
-from typing import Dict, Any
+from typing import Callable, List
 
-
-class Enricher(ABC):
-    @abstractmethod
-    def get(self) -> Dict[str, Any]:
-        raise NotImplementedError
-
-
-class AppVersion(Enricher):
-    def __init__(self, app_version: str):
-        self.app_version = app_version
-
-    def get(self) -> Dict[str, Any]:
-        return {'app_version': self.app_version}
-
-
-class ReleaseStage(Enricher):
-    def __init__(self, release_stage: str):
-        self.release_stage = release_stage
-
-    def get(self) -> Dict[str, Any]:
-        return {'release_stage': self.release_stage}
+from .enrichers import Enricher, AppVersion, ReleaseStage, Host, Thread, Timestamp
 
 
 class ContextFilter(logging.Filter):
-    def __init__(self, enrichers: List[Enricher]):
+    def __init__(self, request_id_getter: Callable, user_context_getter: Callable, enrichers: List[Enricher] = None):
         super().__init__()
+        if enrichers is None:
+            enrichers = []
         self._enrichers = enrichers
 
         self.request_id_getter = request_id_getter
@@ -74,7 +56,7 @@ def initialize_logging(config, request_id_getter, user_context_getter) -> None:
         "filters": {
             "context": {
                 "()": "log_enricher.ContextFilter",
-                "enrichers": [AppVersion(config.APP_VERSION), ReleaseStage(config.RELEASE_STAGE)]
+                "enrichers": [AppVersion(config.APP_VERSION), ReleaseStage(config.RELEASE_STAGE)],
                 "request_id_getter": request_id_getter,
                 "user_context_getter": user_context_getter,
             }
