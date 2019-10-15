@@ -1,43 +1,46 @@
-import datetime
 import logging
 import logging.config
-import platform
 import sys
-import threading
+
+from typing import Any, Callable, Dict, List, Optional
+
+from .enrichers import Enricher, ConfigProperty, Host, Thread, Timestamp  # noqa: F401
 
 
 class ContextFilter(logging.Filter):
-    def __init__(self, config, request_id_getter, user_context_getter):
+    def __init__(self, enrichers: List[Callable] = None):
         super().__init__()
-        self.config = config
-        self.request_id_getter = request_id_getter
-        self.user_context_getter = user_context_getter
+        if enrichers is None:
+            enrichers = []
+        self._enrichers = enrichers
 
     def filter(self, record):
-        record.app_version = self.config.get("app_version")
-        record.release_stage = self.config.get("release_stage")
-        record.host = platform.node()
-        record.thread_id = threading.current_thread().getName()
-        if self.request_id_getter:
-            request_id = self.request_id_getter()
-            if request_id:
-                record.request_id = request_id
-        if self.user_context_getter:
-            user_context = self.user_context_getter()
-            if user_context:
-                record.username = user_context.get("username")
-                record.user_id = user_context.get("user_id")
-                record.path = user_context.get("path")
-        record.timestamp = datetime.datetime.now().isoformat(sep="T", timespec="milliseconds")
+        for enricher in self._enrichers:
+            props = enricher()
+            for attr, value in props.items():
+                setattr(record, attr, value)
+
+        # XXX: replace these with enrichers which take in record as an argument
         record.logger_name = record.name
         record.log_level = record.levelname
         return True
 
 
-def initialize_logging(config, request_id_getter, user_context_getter) -> None:
-    handlers = ["plain"] if config.get("log_mode") == "PLAIN" else ["structured"]
-    log_level = config.get("log_level", "INFO")
-    logging_config = {
+def default_enrichers(config: Dict) -> List[Callable[[], Dict[str, Any]]]:
+    return [
+        ConfigProperty(config, 'app_version'),
+        ConfigProperty(config, 'release_stage'),
+        Host(),
+        Thread(),
+        Timestamp(sep="T", timespec="milliseconds")
+    ]
+
+
+def make_config(config: Dict, enrichers: Optional[List[Callable[[], Dict[str, Any]]]] = None) -> Dict:
+    if enrichers is None:
+        enrichers = []
+
+    return {
         "version": 1,
         "formatters": {
             "json": {"class": "pythonjsonlogger.jsonlogger.JsonFormatter"},
@@ -46,9 +49,7 @@ def initialize_logging(config, request_id_getter, user_context_getter) -> None:
         "filters": {
             "context": {
                 "()": "log_enricher.ContextFilter",
-                "config": config,
-                "request_id_getter": request_id_getter,
-                "user_context_getter": user_context_getter,
+                "enrichers": default_enrichers(config) + enrichers,
             }
         },
         "handlers": {
@@ -58,7 +59,13 @@ def initialize_logging(config, request_id_getter, user_context_getter) -> None:
         "stream": sys.stdout,
         "loggers": {},
     }
-    for logger in config.get("loggers"):
+
+
+def initialize_logging(config: Dict, enrichers: Optional[List[Callable]] = None) -> None:
+    handlers = ["plain"] if config.get("log_mode") == "PLAIN" else ["structured"]
+    log_level = config.get("log_level", "INFO")
+    logging_config = make_config(config, enrichers)
+    for logger in config.get("loggers", []):
         logging_config["loggers"][logger] = {"handlers": handlers, "level": log_level, "propagate": False}
     logging.config.dictConfig(logging_config)
     logging.captureWarnings(True)
