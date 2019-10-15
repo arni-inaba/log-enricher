@@ -5,20 +5,17 @@ import platform
 import sys
 import threading
 
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 
 from .enrichers import Enricher, ConfigProperty, Host, Thread, Timestamp
 
 
 class ContextFilter(logging.Filter):
-    def __init__(self, request_id_getter: Callable, user_context_getter: Callable, enrichers: List[Enricher] = None):
+    def __init__(self, enrichers: List[Callable] = None):
         super().__init__()
         if enrichers is None:
             enrichers = []
         self._enrichers = enrichers
-
-        self.request_id_getter = request_id_getter
-        self.user_context_getter = user_context_getter
 
     def filter(self, record):
         for enricher in self._enrichers:
@@ -26,18 +23,6 @@ class ContextFilter(logging.Filter):
             for attr, value in props.items():
                 setattr(record, attr, value)
 
-        # XXX: replace/remove?
-        if self.request_id_getter:
-            request_id = self.request_id_getter()
-            if request_id:
-                record.request_id = request_id
-        # XXX: replace/remove?
-        if self.user_context_getter:
-            user_context = self.user_context_getter()
-            if user_context:
-                record.username = user_context.get("username")
-                record.user_id = user_context.get("user_id")
-                record.path = user_context.get("path")
         # XXX: replace these with enrichers which take in record as an argument
         record.logger_name = record.name
         record.log_level = record.levelname
@@ -54,10 +39,13 @@ def default_enrichers(config: Dict) -> List[Enricher]:
     ]
 
 
-def initialize_logging(config: Dict, request_id_getter: Callable, user_context_getter: Callable) -> None:
+def make_config(config: Dict, enrichers: Optional[List[Callable]] = None) -> Dict:
+    if enrichers is None:
+        enrichers = []
+
     handlers = ["plain"] if config.get("log_mode") == "PLAIN" else ["structured"]
     log_level = config.get("log_level", "INFO")
-    logging_config = {
+    return {
         "version": 1,
         "formatters": {
             "json": {"class": "pythonjsonlogger.jsonlogger.JsonFormatter"},
@@ -66,9 +54,7 @@ def initialize_logging(config: Dict, request_id_getter: Callable, user_context_g
         "filters": {
             "context": {
                 "()": "log_enricher.ContextFilter",
-                "request_id_getter": request_id_getter,
-                "user_context_getter": user_context_getter,
-                "enrichers": default_enrichers(config),
+                "enrichers": default_enrichers(config) + enrichers,
             }
         },
         "handlers": {
@@ -78,6 +64,10 @@ def initialize_logging(config: Dict, request_id_getter: Callable, user_context_g
         "stream": sys.stdout,
         "loggers": {},
     }
+
+
+def initialize_logging(config: Dict, enrichers: Optional[List[Callable]] = None) -> None:
+    logging_config = make_config(config, enrichers)
     for logger in config.get("loggers"):
         logging_config["loggers"][logger] = {"handlers": handlers, "level": log_level, "propagate": False}
     logging.config.dictConfig(logging_config)
