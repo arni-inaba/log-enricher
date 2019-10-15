@@ -26,16 +26,19 @@ class ContextFilter(logging.Filter):
             for attr, value in props.items():
                 setattr(record, attr, value)
 
+        # XXX: replace/remove?
         if self.request_id_getter:
             request_id = self.request_id_getter()
             if request_id:
                 record.request_id = request_id
+        # XXX: replace/remove?
         if self.user_context_getter:
             user_context = self.user_context_getter()
             if user_context:
                 record.username = user_context.get("username")
                 record.user_id = user_context.get("user_id")
                 record.path = user_context.get("path")
+        # XXX: replace these with enrichers which take in record as an argument
         record.logger_name = record.name
         record.log_level = record.levelname
         return True
