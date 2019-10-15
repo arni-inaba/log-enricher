@@ -44,6 +44,10 @@ class ContextFilter(logging.Filter):
         return True
 
 
+def default_enrichers(config) -> List[Enricher]:
+    return [AppVersion(config.APP_VERSION), ReleaseStage(config.RELEASE_STAGE)]
+
+
 def initialize_logging(config, request_id_getter, user_context_getter) -> None:
     handlers = ["plain"] if config.get("log_mode") == "PLAIN" else ["structured"]
     log_level = config.get("log_level", "INFO")
@@ -56,9 +60,9 @@ def initialize_logging(config, request_id_getter, user_context_getter) -> None:
         "filters": {
             "context": {
                 "()": "log_enricher.ContextFilter",
-                "enrichers": [AppVersion(config.APP_VERSION), ReleaseStage(config.RELEASE_STAGE)],
                 "request_id_getter": request_id_getter,
                 "user_context_getter": user_context_getter,
+                "enrichers": default_enrichers(config),
             }
         },
         "handlers": {
