@@ -14,8 +14,8 @@ class ContextFilter(logging.Filter):
         self.user_context_getter = user_context_getter
 
     def filter(self, record):
-        record.app_version = self.config.APP_VERSION
-        record.release_stage = self.config.RELEASE_STAGE
+        record.app_version = self.config.get("app_version")
+        record.release_stage = self.config.get("release_stage")
         record.host = platform.node()
         record.thread_id = threading.current_thread().getName()
         if self.request_id_getter:
@@ -35,8 +35,8 @@ class ContextFilter(logging.Filter):
 
 
 def initialize_logging(config, request_id_getter, user_context_getter) -> None:
-    handlers = ["plain"] if config.LOG_MODE == "PLAIN" else ["structured"]
-    log_level = "DEBUG" if config.DEBUG else "INFO"
+    handlers = ["plain"] if config.get("log_mode") == "PLAIN" else ["structured"]
+    log_level = config.get("log_level", "INFO")
     logging_config = {
         "version": 1,
         "formatters": {
@@ -58,7 +58,7 @@ def initialize_logging(config, request_id_getter, user_context_getter) -> None:
         "stream": sys.stdout,
         "loggers": {},
     }
-    for logger in config.LOGGERS:
+    for logger in config.get("loggers"):
         logging_config["loggers"][logger] = {"handlers": handlers, "level": log_level, "propagate": False}
     logging.config.dictConfig(logging_config)
     logging.captureWarnings(True)
