@@ -13,20 +13,13 @@ class Enricher(ABC):
         raise NotImplementedError
 
 
-class AppVersion(Enricher):
-    def __init__(self, app_version: str):
-        self.app_version = app_version
+class ConfigProperty(Enricher):
+    def __init__(self, config: Dict, key: str):
+        self.config = config
+        self.key = key
 
     def get(self) -> Dict[str, Any]:
-        return {'app_version': self.app_version}
-
-
-class ReleaseStage(Enricher):
-    def __init__(self, release_stage: str):
-        self.release_stage = release_stage
-
-    def get(self) -> Dict[str, Any]:
-        return {'release_stage': self.release_stage}
+        return {self.key: self.config.get(self.key)}
 
 
 class Host(Enricher):

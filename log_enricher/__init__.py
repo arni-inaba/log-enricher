@@ -7,7 +7,7 @@ import threading
 
 from typing import Callable, Dict, List
 
-from .enrichers import Enricher, AppVersion, ReleaseStage, Host, Thread, Timestamp
+from .enrichers import Enricher, ConfigProperty, Host, Thread, Timestamp
 
 
 class ContextFilter(logging.Filter):
@@ -43,8 +43,8 @@ class ContextFilter(logging.Filter):
 
 def default_enrichers(config: Dict) -> List[Enricher]:
     return [
-        AppVersion(config.get('app_version')),
-        ReleaseStage(config.get('release_stage')),
+        ConfigProperty(config, 'app_version'),
+        ConfigProperty(config, 'release_stage'),
         Host(),
         Thread(),
         Timestamp(sep="T", timespec="milliseconds")
