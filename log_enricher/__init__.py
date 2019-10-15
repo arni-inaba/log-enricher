@@ -5,7 +5,7 @@ import platform
 import sys
 import threading
 
-from typing import Callable, List
+from typing import Callable, Dict, List
 
 from .enrichers import Enricher, AppVersion, ReleaseStage, Host, Thread, Timestamp
 
@@ -41,11 +41,17 @@ class ContextFilter(logging.Filter):
         return True
 
 
-def default_enrichers(config) -> List[Enricher]:
-    return [AppVersion(config.APP_VERSION), ReleaseStage(config.RELEASE_STAGE), Host(), Thread(), Timestamp()]
+def default_enrichers(config: Dict) -> List[Enricher]:
+    return [
+        AppVersion(config.get('app_version')),
+        ReleaseStage(config.get('release_stage')),
+        Host(),
+        Thread(),
+        Timestamp(sep="T", timespec="milliseconds")
+    ]
 
 
-def initialize_logging(config, request_id_getter, user_context_getter) -> None:
+def initialize_logging(config: Dict, request_id_getter: Callable, user_context_getter: Callable) -> None:
     handlers = ["plain"] if config.get("log_mode") == "PLAIN" else ["structured"]
     log_level = config.get("log_level", "INFO")
     logging_config = {

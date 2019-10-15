@@ -8,10 +8,12 @@ from freezegun import freeze_time
 from log_enricher import ContextFilter, default_enrichers
 
 
-class Config:
-    # XXX: This interface is on the chopping block
-    APP_VERSION = "very.mock"
-    RELEASE_STAGE = "mockduction"
+@pytest.fixture
+def config():
+    return dict(
+        app_version="very.mock",
+        release_stage="mockduction",
+    )
 
 
 class Record:
@@ -20,20 +22,20 @@ class Record:
 
 
 @pytest.fixture
-def context_filter():
-    return ContextFilter(lambda: {}, lambda: {}, enrichers=default_enrichers(Config))
+def context_filter(config):
+    return ContextFilter(lambda: {}, lambda: {}, enrichers=default_enrichers(config))
 
 
-def test_context_filter_adds_app_version(context_filter):
+def test_context_filter_adds_app_version(context_filter, config):
     record = Record()
     context_filter.filter(record)
-    assert record.app_version == Config.APP_VERSION
+    assert record.app_version == config['app_version']
 
 
-def test_context_filter_adds_release_stage(context_filter):
+def test_context_filter_adds_release_stage(context_filter, config):
     record = Record()
     context_filter.filter(record)
-    assert record.release_stage == Config.RELEASE_STAGE
+    assert record.release_stage == config['release_stage']
 
 
 def test_context_filter_adds_host(context_filter):
