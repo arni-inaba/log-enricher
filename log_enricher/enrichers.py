@@ -41,4 +41,4 @@ class Thread(Enricher):
 
 class Timestamp(Enricher):
     def get(self) -> Dict[str, Any]:
-        return {'timestamp': datetime.datetime.now().isoformat(sep="T", timespec="millseconds")}
+        return {'timestamp': datetime.datetime.now().isoformat(sep="T", timespec="milliseconds")}

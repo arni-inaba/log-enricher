@@ -26,8 +26,6 @@ class ContextFilter(logging.Filter):
             for attr, value in props.items():
                 setattr(record, attr, value)
 
-        record.host = platform.node()
-        record.thread_id = threading.current_thread().getName()
         if self.request_id_getter:
             request_id = self.request_id_getter()
             if request_id:
@@ -38,14 +36,13 @@ class ContextFilter(logging.Filter):
                 record.username = user_context.get("username")
                 record.user_id = user_context.get("user_id")
                 record.path = user_context.get("path")
-        record.timestamp = datetime.datetime.now().isoformat(sep="T", timespec="milliseconds")
         record.logger_name = record.name
         record.log_level = record.levelname
         return True
 
 
 def default_enrichers(config) -> List[Enricher]:
-    return [AppVersion(config.APP_VERSION), ReleaseStage(config.RELEASE_STAGE)]
+    return [AppVersion(config.APP_VERSION), ReleaseStage(config.RELEASE_STAGE), Host(), Thread(), Timestamp()]
 
 
 def initialize_logging(config, request_id_getter, user_context_getter) -> None:
