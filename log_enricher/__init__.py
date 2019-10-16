@@ -62,10 +62,10 @@ def make_config(config: Dict, enrichers: Optional[List[Callable[[], Dict[str, An
 
 
 def initialize_logging(config: Dict, enrichers: Optional[List[Callable]] = None) -> None:
-    handlers = ["plain"] if config.get("log_mode") == "PLAIN" else ["structured"]
+    handlers = config.get("handlers")
     log_level = config.get("log_level", "INFO")
     logging_config = make_config(config, enrichers)
     for logger in config.get("loggers", []):
-        logging_config["loggers"][logger] = {"handlers": handlers, "level": log_level, "propagate": False}
+        logging_config["loggers"][logger] = {"handlers": [handlers], "level": log_level, "propagate": False}
     logging.config.dictConfig(logging_config)
     logging.captureWarnings(True)
