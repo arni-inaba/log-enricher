@@ -1,0 +1,9 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/log-enricher
+    docker:
+      - image: themattrix/tox
+    steps:
+      - checkout
+      - run: tox
