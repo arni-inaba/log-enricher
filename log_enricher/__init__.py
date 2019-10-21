@@ -4,6 +4,9 @@ import sys
 
 from typing import Any, Callable, Dict, List, Optional
 
+import strEnum as strEnum
+from enum import auto
+
 from .enrichers import Enricher, ConfigProperty, Host, Thread, Timestamp  # noqa: F401
 
 
@@ -61,16 +64,29 @@ def make_config(config: Dict, enrichers: Optional[List[Callable[[], Dict[str, An
     }
 
 
+class LogLevel(strEnum):
+    CRITICAL = auto()
+    FATAL = auto()
+    ERROR = auto()
+    WARNING = auto()
+    INFO = auto()
+    DEBUG = auto()
 
-def initialize_logging(config: Dict, enrichers: Optional[List[Callable]] = None) -> None:
+
+class LogMode(strEnum):
+    STRUCTURED = auto()
+    PLAIN = auto()
+
+
+def initialize_logging(config: Dict, enrichers: Optional[List[Callable]] = None,
+                       log_level: Optional[LogLevel] = None,
+                       log_mode: Optional[LogMode] = None) -> None:
     """
     Sets up the python `logging` module by calling logging.config.dictConfig: https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig
 
     Python `logging` config dict schema: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
 
     config = {
-        "handlers": "plain"/"structured",
-        "log_level": "DEBUG",
         "app_version": "xyz",
         "release_stage": "staging",
         "loggers": ["py", "mylogger"]
@@ -79,9 +95,11 @@ def initialize_logging(config: Dict, enrichers: Optional[List[Callable]] = None)
     Args:
         config: A dict with keys accepted by Python `logging` config dict schema: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
         enrichers: A list of callable enricher classes
+        log_mode:
+        log_level:
     """
-    handlers = config.get("handlers")
-    log_level = config.get("log_level", "INFO")
+    handlers = log_mode if log_mode is not None else config.get("handlers")
+    log_level = log_level if log_level is not None else config.get("log_level", "INFO")
     logging_config = make_config(config, enrichers)
     for logger in config.get("loggers", []):
         logging_config["loggers"][logger] = {"handlers": [handlers], "level": log_level, "propagate": False}
