@@ -19,8 +19,17 @@ pip install log-enricher
 configuration
 -------------
 
-The log-enricher is configured with a simple dictionary:
-```
+Log-enricher runs Enrichers, and is configured with a simple dictionary:
+
+```python
+from log_enricher import initialize_logging
+
+from log_enricher.enrichers import Enricher
+
+class RequestIDEnricher(Enricher):
+    def __call__(self) -> Dict[str, Any]:
+        return {"request_id": get_request_id()}
+
 config = {
     "handlers": "plain"/"structured",
     "log_level": "DEBUG",
@@ -28,6 +37,16 @@ config = {
     "release_stage": "staging",
     "loggers": ["py", "mylogger"]
 }
+
+initialize_logging(config, enrichers=[RequestIDEnricher()])
 ```
+
 Logs will be output in a plain, console-friendly format if `handlers` is 
 `"plain"`, or in a structured JSON format if it is `"structured"`.
+
+`initialize_logging()` will talk to and configure the `logging` subsystem. Once that has been called, `logging`
+will use the new configuration.
+
+# TODO: HOW DO ENRICHERS WORK?
+
+# TODO: WHAT OPTIONS ARE ALLOWED IN THE CONFIG DICT?
