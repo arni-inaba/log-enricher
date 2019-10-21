@@ -4,6 +4,8 @@ version = "0.1.2"
 description = "Library to enrich structured logs"
 authors = ["Arni Inaba Kjartansson <arni@grid.is>"]
 license = "MIT"
+repository = "https://github.com/arni-inaba/log-enricher"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.7"
