@@ -44,14 +44,17 @@ initialize_logging(config, enrichers=[RequestIDEnricher()])
 Logs will be output in a plain, console-friendly format if `handlers` is 
 `"plain"`, or in a structured JSON format if it is `"structured"`.
 
-`initialize_logging()` will talk to and configure the `logging` subsystem. Once that has been called, `logging`
+`initialize_logging(...)` will talk to and configure the `logging` subsystem. Once that has been called, `logging`
 will use the new configuration.
 
 options
 -------
-<!---
-TODO: What options are allowed? What are they from?
--->
+`initialize_logging(...)` up the Python `logging` module by calling logging.config.dictConfig: 
+https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig
+
+The `logging` config dict schema is followed: 
+https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+
 
 enrichers
 ---------
