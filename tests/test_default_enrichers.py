@@ -23,7 +23,7 @@ class Record:
 
 @pytest.fixture
 def context_filter(config):
-    return ContextFilter(enrichers=default_enrichers(config))
+    return ContextFilter(enrichers=default_enrichers(**config))
 
 
 def test_context_filter_adds_app_version(context_filter, config):

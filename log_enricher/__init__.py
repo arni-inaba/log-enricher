@@ -4,7 +4,7 @@ import sys
 
 from typing import Any, Callable, Dict, List, Optional
 
-from .enrichers import Enricher, ConfigProperty, Host, Thread, Timestamp  # noqa: F401
+from .enrichers import Enricher, ConstantProperty, Host, Thread, Timestamp  # noqa: F401
 
 
 class ContextFilter(logging.Filter):
@@ -26,17 +26,21 @@ class ContextFilter(logging.Filter):
         return True
 
 
-def default_enrichers(config: Dict) -> List[Callable[[], Dict[str, Any]]]:
+def default_enrichers(app_version: str, release_stage: str) -> List[Callable[[], Dict[str, Any]]]:
     return [
-        ConfigProperty(config, 'app_version'),
-        ConfigProperty(config, 'release_stage'),
+        ConstantProperty('app_version', app_version),
+        ConstantProperty('release_stage', release_stage),
         Host(),
         Thread(),
         Timestamp(sep="T", timespec="milliseconds")
     ]
 
 
-def make_config(config: Dict, enrichers: Optional[List[Callable[[], Dict[str, Any]]]] = None) -> Dict:
+def make_config(
+        app_version: str,
+        release_stage: str,
+        enrichers: Optional[List[Callable[[], Dict[str, Any]]]] = None
+) -> Dict:
     if enrichers is None:
         enrichers = []
 
@@ -49,7 +53,7 @@ def make_config(config: Dict, enrichers: Optional[List[Callable[[], Dict[str, An
         "filters": {
             "context": {
                 "()": "log_enricher.ContextFilter",
-                "enrichers": default_enrichers(config) + enrichers,
+                "enrichers": default_enrichers(app_version, release_stage) + enrichers,
             }
         },
         "handlers": {
@@ -61,11 +65,16 @@ def make_config(config: Dict, enrichers: Optional[List[Callable[[], Dict[str, An
     }
 
 
-def initialize_logging(config: Dict, enrichers: Optional[List[Callable]] = None) -> None:
-    handlers = config.get("handlers")
-    log_level = config.get("log_level", "INFO")
-    logging_config = make_config(config, enrichers)
-    for logger in config.get("loggers", []):
+def initialize_logging(
+        handlers: str,
+        app_version: str,
+        release_stage: str,
+        loggers: List[str],
+        log_level: str = "INFO",
+        enrichers: Optional[List[Callable]] = None
+) -> None:
+    logging_config = make_config(app_version, release_stage, enrichers)
+    for logger in loggers:
         logging_config["loggers"][logger] = {"handlers": [handlers], "level": log_level, "propagate": False}
     logging.config.dictConfig(logging_config)
     logging.captureWarnings(True)
