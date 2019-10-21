@@ -61,7 +61,25 @@ def make_config(config: Dict, enrichers: Optional[List[Callable[[], Dict[str, An
     }
 
 
+
 def initialize_logging(config: Dict, enrichers: Optional[List[Callable]] = None) -> None:
+    """
+    Sets up the python `logging` module by calling logging.config.dictConfig: https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig
+
+    Python `logging` config dict schema: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+
+    config = {
+        "handlers": "plain"/"structured",
+        "log_level": "DEBUG",
+        "app_version": "xyz",
+        "release_stage": "staging",
+        "loggers": ["py", "mylogger"]
+    }
+
+    Args:
+        config: A dict with keys accepted by Python `logging` config dict schema: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+        enrichers: A list of callable enricher classes
+    """
     handlers = config.get("handlers")
     log_level = config.get("log_level", "INFO")
     logging_config = make_config(config, enrichers)
