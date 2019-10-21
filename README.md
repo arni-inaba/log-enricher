@@ -47,6 +47,15 @@ Logs will be output in a plain, console-friendly format if `handlers` is
 `initialize_logging()` will talk to and configure the `logging` subsystem. Once that has been called, `logging`
 will use the new configuration.
 
-# TODO: HOW DO ENRICHERS WORK?
+options
+-------
+<!---
+TODO: What options are allowed? What are they from?
+-->
 
-# TODO: WHAT OPTIONS ARE ALLOWED IN THE CONFIG DICT?
+enrichers
+---------
+To build a log enricher, make a subclass of Enricher and implement `__call__()`. Any method returning a dict can 
+be used to enrich log records, see [log_enricher/enrichers.py](log_enricher/enrichers.py).  The key-value pairs
+in the dict are added as attribute-value pairs to the log record. Any method calls need to work in any subsequent
+context the logging system is called.
