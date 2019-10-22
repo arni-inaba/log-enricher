@@ -66,15 +66,38 @@ def make_config(
 
 
 def initialize_logging(
-        handlers: str,
-        app_version: str,
-        release_stage: str,
+        log_mode: str,
         loggers: List[str],
-        log_level: str = "INFO",
+        app_version: Optional[str],
+        release_stage: Optional[str],
+        log_level: Optional[str] = "INFO",
         enrichers: Optional[List[Callable]] = None
 ) -> None:
+    """
+    Sets up the python `logging` module by calling logging.config.dictConfig:
+    https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig
+    Python `logging` config dict schema: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+    config = {
+        "log_mode": "plain"/"structured",
+        "log_level": "DEBUG",
+        "app_version": "xyz",
+        "release_stage": "staging",
+        "loggers": ["py", "mylogger"]
+    }
+    Args:
+        log_mode: Either "structured" or "plain"
+        loggers: The loggers to be configured
+        app_version: The version of the running app
+        release_stage: Where the app is running, e.g. "staging" or "production"
+        log_level: Log severity level
+        enrichers: A list of callable enricher classes
+    """
+    if app_version is None:
+        app_version = "N/A"
+    if release_stage is None:
+        release_stage = "unknown"
     logging_config = make_config(app_version, release_stage, enrichers)
     for logger in loggers:
-        logging_config["loggers"][logger] = {"handlers": [handlers], "level": log_level, "propagate": False}
+        logging_config["loggers"][logger] = {"handlers": [log_mode], "level": log_level, "propagate": False}
     logging.config.dictConfig(logging_config)
     logging.captureWarnings(True)
