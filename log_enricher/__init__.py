@@ -68,8 +68,8 @@ def make_config(
 def initialize_logging(
         log_mode: str,
         loggers: List[str],
-        app_version: Optional[str],
-        release_stage: Optional[str],
+        app_version: Optional[str] = None,
+        release_stage: Optional[str] = None,
         log_level: Optional[str] = "INFO",
         enrichers: Optional[List[Callable]] = None
 ) -> None:
