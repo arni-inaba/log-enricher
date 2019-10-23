@@ -1,7 +1,6 @@
 import logging
 import logging.config
 import sys
-from enum import Enum, auto
 
 from typing import Any, Callable, Dict, List, Optional
 
