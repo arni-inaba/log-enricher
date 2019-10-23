@@ -4,8 +4,8 @@ import sys
 
 from typing import Any, Callable, Dict, List, Optional
 
-from strenum import StrEnum
-from sorcery import assigned_names
+from strenum import StrEnum  # type: ignore
+from sorcery import assigned_names  # type: ignore
 
 from .enrichers import Enricher, ConstantProperty, Host, Thread, Timestamp  # noqa: F401
 
