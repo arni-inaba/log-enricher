@@ -1,8 +1,12 @@
 import logging
 import logging.config
 import sys
+from enum import Enum, auto
 
 from typing import Any, Callable, Dict, List, Optional
+
+from strenum import StrEnum
+from sorcery import assigned_names
 
 from .enrichers import Enricher, ConstantProperty, Host, Thread, Timestamp  # noqa: F401
 
@@ -65,33 +69,33 @@ def make_config(
     }
 
 
+class Level(StrEnum):
+    # Convenience enum that matches the logging library's levels
+    # and autoconverts to a string to match initialize_logging(log_level)
+    CRITICAL, FATAL, ERROR, WARNING, INFO, DEBUG = assigned_names()
+
+
 def initialize_logging(
-        log_mode: str,
         loggers: List[str],
+        structured_logs: bool = True,
         app_version: Optional[str] = None,
         release_stage: Optional[str] = None,
-        log_level: Optional[str] = "INFO",
+        log_level: Optional[str] = Level.INFO,
         enrichers: Optional[List[Callable]] = None
 ) -> None:
     """
     Sets up the python `logging` module by calling logging.config.dictConfig:
     https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig
     Python `logging` config dict schema: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
-    config = {
-        "log_mode": "plain"/"structured",
-        "log_level": "DEBUG",
-        "app_version": "xyz",
-        "release_stage": "staging",
-        "loggers": ["py", "mylogger"]
-    }
     Args:
-        log_mode: Either "structured" or "plain"
-        loggers: The loggers to be configured
+        loggers: The loggers to be configured, e.g. ["py", "mylogger"]
+        structured_logs: Whether logs should be structured ('structured' vs. 'plain' in 'handlers')
         app_version: The version of the running app
         release_stage: Where the app is running, e.g. "staging" or "production"
         log_level: Log severity level
         enrichers: A list of callable enricher classes
     """
+    log_mode = "structured" if structured_logs else "plain"
     if app_version is None:
         app_version = "N/A"
     if release_stage is None:
