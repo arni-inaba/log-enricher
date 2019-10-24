@@ -40,3 +40,10 @@ def main():
 ```
 Logs will be output in a structured JSON format if `structured_logs` is `True`,
 or in a plain, console-friendly format if it is `False`.
+
+enrichers
+---------
+To build a log enricher, make a subclass of Enricher, or Callable, and implement `__call__()`. Any method returning 
+a dict can be used to enrich log records. See [log_enricher/enrichers.py](log_enricher/enrichers.py). The key-value
+pairs in the dict are added as attribute-value pairs to the log record. Of course, any method calls in the 
+enrichers need to  work in any subsequent context the logging system is called.
