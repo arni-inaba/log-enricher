@@ -8,34 +8,14 @@ from freezegun import freeze_time
 from log_enricher import ContextFilter, default_enrichers
 
 
-@pytest.fixture
-def config():
-    return dict(
-        app_version="very.mock",
-        release_stage="mockduction",
-    )
-
-
 class Record:
     name = "mock"
     levelname = "info"
 
 
 @pytest.fixture
-def context_filter(config):
-    return ContextFilter(enrichers=default_enrichers(**config))
-
-
-def test_context_filter_adds_app_version(context_filter, config):
-    record = Record()
-    context_filter.filter(record)
-    assert record.app_version == config['app_version']
-
-
-def test_context_filter_adds_release_stage(context_filter, config):
-    record = Record()
-    context_filter.filter(record)
-    assert record.release_stage == config['release_stage']
+def context_filter():
+    return ContextFilter(enrichers=default_enrichers())
 
 
 def test_context_filter_adds_host(context_filter):
