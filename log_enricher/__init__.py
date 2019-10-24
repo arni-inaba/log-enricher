@@ -4,7 +4,10 @@ import sys
 
 from typing import Any, Callable, Dict, List, Optional
 
-from .enrichers import Enricher, ConfigProperty, Host, Thread, Timestamp  # noqa: F401
+from strenum import StrEnum  # type: ignore
+from sorcery import assigned_names  # type: ignore
+
+from .enrichers import Enricher, ConstantProperty, Host, Thread, Timestamp  # noqa: F401
 
 
 class ContextFilter(logging.Filter):
@@ -26,17 +29,17 @@ class ContextFilter(logging.Filter):
         return True
 
 
-def default_enrichers(config: Dict) -> List[Callable[[], Dict[str, Any]]]:
+def default_enrichers() -> List[Callable[[], Dict[str, Any]]]:
     return [
-        ConfigProperty(config, 'app_version'),
-        ConfigProperty(config, 'release_stage'),
         Host(),
         Thread(),
         Timestamp(sep="T", timespec="milliseconds")
     ]
 
 
-def make_config(config: Dict, enrichers: Optional[List[Callable[[], Dict[str, Any]]]] = None) -> Dict:
+def make_config(
+        enrichers: Optional[List[Callable[[], Dict[str, Any]]]] = None
+) -> Dict:
     if enrichers is None:
         enrichers = []
 
@@ -49,7 +52,7 @@ def make_config(config: Dict, enrichers: Optional[List[Callable[[], Dict[str, An
         "filters": {
             "context": {
                 "()": "log_enricher.ContextFilter",
-                "enrichers": default_enrichers(config) + enrichers,
+                "enrichers": default_enrichers() + enrichers,
             }
         },
         "handlers": {
@@ -61,11 +64,31 @@ def make_config(config: Dict, enrichers: Optional[List[Callable[[], Dict[str, An
     }
 
 
-def initialize_logging(config: Dict, enrichers: Optional[List[Callable]] = None) -> None:
-    handlers = config.get("handlers")
-    log_level = config.get("log_level", "INFO")
-    logging_config = make_config(config, enrichers)
-    for logger in config.get("loggers", []):
-        logging_config["loggers"][logger] = {"handlers": [handlers], "level": log_level, "propagate": False}
+class Level(StrEnum):
+    # Convenience enum that matches the logging library's levels
+    # and autoconverts to a string to match initialize_logging(log_level)
+    CRITICAL, FATAL, ERROR, WARNING, INFO, DEBUG = assigned_names()
+
+
+def initialize_logging(
+        loggers: List[str],
+        structured_logs: bool = True,
+        log_level: Optional[str] = Level.INFO,
+        enrichers: Optional[List[Callable]] = None
+) -> None:
+    """
+    Sets up the python `logging` module by calling logging.config.dictConfig:
+    https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig
+    Python `logging` config dict schema: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+    Args:
+        loggers: The loggers to be configured, e.g. ["py", "mylogger"]
+        structured_logs: Whether logs should be structured ('structured' vs. 'plain' in 'handlers')
+        log_level: Log severity level
+        enrichers: A list of callable enricher classes
+    """
+    log_mode = "structured" if structured_logs else "plain"
+    logging_config = make_config(enrichers)
+    for logger in loggers:
+        logging_config["loggers"][logger] = {"handlers": [log_mode], "level": log_level, "propagate": False}
     logging.config.dictConfig(logging_config)
     logging.captureWarnings(True)

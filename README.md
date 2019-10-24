@@ -19,15 +19,24 @@ pip install log-enricher
 configuration
 -------------
 
-The log-enricher is configured with a simple dictionary:
+The log-enricher takes in a list of functions that return a dictionary:
+```python
+import os
+
+from log_enricher import initialize_logging, Level
+from app import current_user_context
+
+def main():
+    extra_log_properties = {
+        "app_version": os.environ.get("APP_VERSION", "N/A"),
+        "release_stage": os.environ.get("RELEASE_STAGE", "unknown"),
+    }
+    initialize_logging(
+        loggers=["uvicorn", "sqlalchemy"],
+        structured_logs=os.environ.get("STRUCTURED_LOGS", True),
+        log_level=Level.INFO,
+        enrichers=[current_user_context, lambda: extra_log_properties],
+    )
 ```
-config = {
-    "handlers": "plain"/"structured",
-    "log_level": "DEBUG",
-    "app_version": "xyz",
-    "release_stage": "staging",
-    "loggers": ["py", "mylogger"]
-}
-```
-Logs will be output in a plain, console-friendly format if `handlers` is 
-`"plain"`, or in a structured JSON format if it is `"structured"`.
+Logs will be output in a structured JSON format if `structured_logs` is `True`,
+or in a plain, console-friendly format if it is `False`.

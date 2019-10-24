@@ -13,13 +13,13 @@ class Enricher(ABC):
         raise NotImplementedError
 
 
-class ConfigProperty(Enricher):
-    def __init__(self, config: Dict, key: str):
-        self.config = config
+class ConstantProperty(Enricher):
+    def __init__(self, key: str, value: str):
         self.key = key
+        self.value = value
 
     def __call__(self) -> Dict[str, Any]:
-        return {self.key: self.config.get(self.key)}
+        return {self.key: self.value}
 
 
 class Host(Enricher):
