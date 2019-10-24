@@ -29,10 +29,8 @@ class ContextFilter(logging.Filter):
         return True
 
 
-def default_enrichers(app_version: str, release_stage: str) -> List[Callable[[], Dict[str, Any]]]:
+def default_enrichers() -> List[Callable[[], Dict[str, Any]]]:
     return [
-        ConstantProperty('app_version', app_version),
-        ConstantProperty('release_stage', release_stage),
         Host(),
         Thread(),
         Timestamp(sep="T", timespec="milliseconds")
@@ -40,8 +38,6 @@ def default_enrichers(app_version: str, release_stage: str) -> List[Callable[[],
 
 
 def make_config(
-        app_version: str,
-        release_stage: str,
         enrichers: Optional[List[Callable[[], Dict[str, Any]]]] = None
 ) -> Dict:
     if enrichers is None:
@@ -56,7 +52,7 @@ def make_config(
         "filters": {
             "context": {
                 "()": "log_enricher.ContextFilter",
-                "enrichers": default_enrichers(app_version, release_stage) + enrichers,
+                "enrichers": default_enrichers() + enrichers,
             }
         },
         "handlers": {
@@ -77,8 +73,6 @@ class Level(StrEnum):
 def initialize_logging(
         loggers: List[str],
         structured_logs: bool = True,
-        app_version: Optional[str] = None,
-        release_stage: Optional[str] = None,
         log_level: Optional[str] = Level.INFO,
         enrichers: Optional[List[Callable]] = None
 ) -> None:
@@ -89,17 +83,11 @@ def initialize_logging(
     Args:
         loggers: The loggers to be configured, e.g. ["py", "mylogger"]
         structured_logs: Whether logs should be structured ('structured' vs. 'plain' in 'handlers')
-        app_version: The version of the running app
-        release_stage: Where the app is running, e.g. "staging" or "production"
         log_level: Log severity level
         enrichers: A list of callable enricher classes
     """
     log_mode = "structured" if structured_logs else "plain"
-    if app_version is None:
-        app_version = "N/A"
-    if release_stage is None:
-        release_stage = "unknown"
-    logging_config = make_config(app_version, release_stage, enrichers)
+    logging_config = make_config(enrichers)
     for logger in loggers:
         logging_config["loggers"][logger] = {"handlers": [log_mode], "level": log_level, "propagate": False}
     logging.config.dictConfig(logging_config)
