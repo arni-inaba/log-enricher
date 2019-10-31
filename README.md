@@ -19,27 +19,41 @@ pip install log-enricher
 configuration
 -------------
 
-The log-enricher takes in a list of functions that return a dictionary:
+`log-enricher.initialize_logging(...)` configures the `logging` library and takes in `enrichers`, a list of 
+functions that return a dictionary. When a log message is sent, the enrichers are run automatically and their 
+output is added to the log message, if structured logging is enabled.
+
+Furthermore, `initialize_logging()` takes a list of `loggers` to use, a switch to control `structured_logs` 
+(JSON logs, default on), and a `log_level` setting.
+
+Logs will be output in a structured JSON format by default - if `structured_logs` is `True` - 
+or in a plain, console-friendly format if `structured_logs` is `False`.
+
+config example
+--------------
 ```python
 import os
 
 from log_enricher import initialize_logging, Level
-from app import current_user_context
+from log_enricher.enrichers import Enricher
+
+class UserContextEnricher(Enricher):
+    def __call__(self) -> Dict[str, Any]:
+        user_context = get_user_context()
+        return {"username": user_context.get("username")}
+
+extra_log_properties = {
+    "app_version": Config.APP_VERSION, "release_stage": Config.RELEASE_STAGE
+}
 
 def main():
-    extra_log_properties = {
-        "app_version": os.environ.get("APP_VERSION", "N/A"),
-        "release_stage": os.environ.get("RELEASE_STAGE", "unknown"),
-    }
     initialize_logging(
         loggers=["uvicorn", "sqlalchemy"],
         structured_logs=os.environ.get("STRUCTURED_LOGS", True),
         log_level=Level.INFO,
-        enrichers=[current_user_context, lambda: extra_log_properties],
+        enrichers=[UserContextEnricher(), lambda: extra_log_properties],
     )
 ```
-Logs will be output in a structured JSON format if `structured_logs` is `True`,
-or in a plain, console-friendly format if it is `False`.
 
 enrichers
 ---------
