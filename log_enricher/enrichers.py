@@ -25,12 +25,12 @@ class ConstantProperty(Enricher):
 
 class Host(Enricher):
     def __call__(self) -> Dict[str, Any]:
-        return {'host': platform.node()}
+        return {"host": platform.node()}
 
 
 class Thread(Enricher):
     def __call__(self) -> Dict[str, Any]:
-        return {'thread_id': threading.current_thread().getName()}
+        return {"thread_id": threading.current_thread().getName()}
 
 
 class ProcessID(Enricher):
@@ -49,4 +49,4 @@ class Timestamp(Enricher):
         self.kwargs = kwargs
 
     def __call__(self) -> Dict[str, Any]:
-        return {'timestamp': datetime.datetime.now().isoformat(**self.kwargs)}
+        return {"timestamp": datetime.datetime.now().isoformat(**self.kwargs)}
