@@ -8,7 +8,6 @@ def test_make_config_uses_default_enrichers():
         default_enrichers.return_value = ['a', 'b']
         config = make_config()
         assert default_enrichers.called
-        print(config)
         assert config['filters']['context']['enrichers'] == ['a', 'b']
 
 

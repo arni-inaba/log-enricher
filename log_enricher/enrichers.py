@@ -1,4 +1,5 @@
 import datetime
+import os
 import platform
 import threading
 
@@ -30,6 +31,11 @@ class Host(Enricher):
 class Thread(Enricher):
     def __call__(self) -> Dict[str, Any]:
         return {'thread_id': threading.current_thread().getName()}
+
+
+class ProcessID(Enricher):
+    def __call__(self) -> Dict[str, Any]:
+        return {"process_id": os.getpid()}
 
 
 class Timestamp(Enricher):
