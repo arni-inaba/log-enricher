@@ -30,17 +30,10 @@ class ContextFilter(logging.Filter):
 
 
 def default_enrichers() -> List[Callable[[], Dict[str, Any]]]:
-    return [
-        Host(),
-        Thread(),
-        Timestamp(sep="T", timespec="milliseconds"),
-        ProcessID()
-    ]
+    return [Host(), Thread(), Timestamp(sep="T", timespec="milliseconds"), ProcessID()]
 
 
-def make_config(
-        enrichers: Optional[List[Callable[[], Dict[str, Any]]]] = None
-) -> Dict:
+def make_config(enrichers: Optional[List[Callable[[], Dict[str, Any]]]] = None) -> Dict:
     if enrichers is None:
         enrichers = []
 
@@ -50,12 +43,7 @@ def make_config(
             "json": {"class": "pythonjsonlogger.jsonlogger.JsonFormatter"},
             "plain": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
         },
-        "filters": {
-            "context": {
-                "()": "log_enricher.ContextFilter",
-                "enrichers": default_enrichers() + enrichers,
-            }
-        },
+        "filters": {"context": {"()": "log_enricher.ContextFilter", "enrichers": default_enrichers() + enrichers}},
         "handlers": {
             "structured": {"class": "logging.StreamHandler", "formatter": "json", "filters": ["context"]},
             "plain": {"class": "logging.StreamHandler", "formatter": "plain", "filters": ["context"]},
@@ -72,10 +60,10 @@ class Level(StrEnum):
 
 
 def initialize_logging(
-        loggers: List[str],
-        structured_logs: bool = True,
-        log_level: Optional[str] = Level.INFO,
-        enrichers: Optional[List[Callable]] = None
+    loggers: List[str],
+    structured_logs: bool = True,
+    log_level: Optional[str] = Level.INFO,
+    enrichers: Optional[List[Callable]] = None,
 ) -> None:
     """
     Sets up the python `logging` module by calling logging.config.dictConfig:
