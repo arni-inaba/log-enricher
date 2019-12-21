@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "log-enricher"
-version = "0.1.4"
+version = "0.1.5"
 description = "Library to enrich structured logs"
 authors = ["Arni Inaba Kjartansson <arni@grid.is>"]
 license = "MIT"
@@ -8,7 +8,7 @@ repository = "https://github.com/arni-inaba/log-enricher"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 python-json-logger = "^0.1.11"
 strenum = "^0.4.0"
 sorcery = "^0.2.0"
