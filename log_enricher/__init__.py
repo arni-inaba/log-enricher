@@ -5,7 +5,6 @@ import sys
 from typing import Any, Callable, Dict, List, Optional
 
 from strenum import StrEnum  # type: ignore
-from sorcery import assigned_names  # type: ignore
 
 from .enrichers import Enricher, ConstantProperty, Host, Thread, Timestamp, ProcessID  # noqa: F401
 
@@ -54,9 +53,12 @@ def make_config(enrichers: Optional[List[Callable[[], Dict[str, Any]]]] = None) 
 
 
 class Level(StrEnum):
-    # Convenience enum that matches the logging library's levels
-    # and autoconverts to a string to match initialize_logging(log_level)
-    CRITICAL, FATAL, ERROR, WARNING, INFO, DEBUG = assigned_names()
+    CRITICAL = "CRITICAL"
+    FATAL = "FATAL"
+    ERROR = "ERROR"
+    WARNING = "WARNING"
+    INFO = "INFO"
+    DEBUG = "DEBUG"
 
 
 def initialize_logging(
