@@ -61,6 +61,20 @@ class Level(StrEnum):
     DEBUG = "DEBUG"
 
 
+def configure_loggers(loggers, log_mode, log_level):
+    loggers_cfg = {}
+    for logger in loggers:
+        if type(logger) == str:
+            loggers_cfg["loggers"][logger] = {"handlers": [log_mode], "level": log_level, "propagate": False}
+        elif type(logger) == dict:
+            loggers_cfg["loggers"][logger["name"]] = {
+                "handlers": [log_mode],
+                "level": logger["log_level"],
+                "propagate": False,
+            }
+    return loggers_cfg
+
+
 def initialize_logging(
     loggers: List[str],
     structured_logs: bool = True,
@@ -79,7 +93,6 @@ def initialize_logging(
     """
     log_mode = "structured" if structured_logs else "plain"
     logging_config = make_config(enrichers)
-    for logger in loggers:
-        logging_config["loggers"][logger] = {"handlers": [log_mode], "level": log_level, "propagate": False}
+    logging_config["loggers"] = configure_loggers(loggers, log_mode, log_level)
     logging.config.dictConfig(logging_config)
     logging.captureWarnings(True)

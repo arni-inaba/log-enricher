@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "log-enricher"
-version = "1.0.0"
+version = "1.1.0"
 description = "Library to enrich structured logs"
 authors = ["Arni Inaba Kjartansson <arni@grid.is>"]
 license = "MIT"
