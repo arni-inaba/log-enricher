@@ -12,7 +12,7 @@ lint:
 	poetry run mypy log_enricher
 
 black:
-	poetry run black log_enricher tests
+	poetry run black $(shell git diff --name-only --diff-filter d HEAD|grep \.py$)
 
 pre_commit:
 	poetry run pre-commit install
