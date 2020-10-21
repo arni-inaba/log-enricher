@@ -6,7 +6,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from strenum import StrEnum  # type: ignore
 
-from .enrichers import Enricher, ConstantProperty, Host, Thread, Timestamp, ProcessID  # noqa: F401
+from .enrichers import Enricher, ConstantProperty, Timestamp  # noqa: F401
 
 
 class ContextFilter(logging.Filter):
@@ -29,7 +29,7 @@ class ContextFilter(logging.Filter):
 
 
 def default_enrichers() -> List[Callable[[], Dict[str, Any]]]:
-    return [Host(), Thread(), Timestamp(sep="T", timespec="milliseconds"), ProcessID()]
+    return [Timestamp(sep="T", timespec="milliseconds")]
 
 
 def make_config(enrichers: Optional[List[Callable[[], Dict[str, Any]]]] = None) -> Dict:
