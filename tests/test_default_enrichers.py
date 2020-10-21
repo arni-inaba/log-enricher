@@ -1,6 +1,4 @@
 import datetime
-import platform
-import threading
 
 import pytest
 from freezegun import freeze_time
@@ -16,24 +14,6 @@ class Record:
 @pytest.fixture
 def context_filter():
     return ContextFilter(enrichers=default_enrichers())
-
-
-def test_context_filter_adds_host(context_filter):
-    record = Record()
-    context_filter.filter(record)
-    assert record.host == platform.node()
-
-
-def test_context_filter_adds_thread_id(context_filter):
-    record = Record()
-    context_filter.filter(record)
-    assert record.thread_id == threading.current_thread().getName()
-
-
-def test_context_filter_adds_process_id(context_filter):
-    record = Record()
-    context_filter.filter(record)
-    assert isinstance(record.process_id, int)
 
 
 @freeze_time()

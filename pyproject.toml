@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "log-enricher"
-version = "0.1.6"
+version = "1.0.0"
 description = "Library to enrich structured logs"
 authors = ["Arni Inaba Kjartansson <arni@grid.is>"]
 license = "MIT"
@@ -15,9 +15,9 @@ strenum = "^0.4.0"
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 freezegun = "^0.3.12"
-mypy = {version = "=0.720.0", allows-prereleases = true}
+mypy = {version = "=0.720.0", allow-prereleases = true}
 flake8 = "^3.7"
-black = {version = "^18.3-alpha.0", allows-prereleases = true}
+black = {version = "^18.3-alpha.0", allow-prereleases = true}
 pre-commit = "^1.20"
 [tool.black]
 line-length = 115
