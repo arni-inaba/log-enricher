@@ -65,9 +65,9 @@ def configure_loggers(loggers, log_mode, log_level):
     loggers_cfg = {}
     for logger in loggers:
         if type(logger) == str:
-            loggers_cfg["loggers"][logger] = {"handlers": [log_mode], "level": log_level, "propagate": False}
+            loggers_cfg[logger] = {"handlers": [log_mode], "level": log_level, "propagate": False}
         elif type(logger) == dict:
-            loggers_cfg["loggers"][logger["name"]] = {
+            loggers_cfg[logger["name"]] = {
                 "handlers": [log_mode],
                 "level": logger["log_level"],
                 "propagate": False,
