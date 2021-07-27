@@ -20,13 +20,10 @@ def test_make_config_combines_default_enrichers_with_given_enrichers():
 
 
 def test_configure_loggers():
-    loggers = [
-        "simple_logger",
-        {
-            "name": "complex_logger",
-            "log_level": "DEBUG"
-        }
-    ]
-    loggers_config = configure_loggers(loggers, "structured", "INFO")
+    loggers = ["simple_logger"]
+    complex_loggers = [{"name": "complex_logger", "log_level": "DEBUG"}]
+    loggers_config = configure_loggers(loggers, complex_loggers, "structured", "INFO")
     assert loggers_config["simple_logger"]["level"] == "INFO"
+    assert loggers_config["simple_logger"]["propagate"] is True
+    assert loggers_config["simple_logger"]["handlers"] == ["structured"]
     assert loggers_config["complex_logger"]["level"] == "DEBUG"

@@ -61,22 +61,26 @@ class Level(StrEnum):
     DEBUG = "DEBUG"
 
 
-def configure_loggers(loggers, log_mode, log_level):
+def configure_loggers(loggers, complex_loggers, log_mode, log_level):
+    if loggers is None:
+        loggers = []
+    if complex_loggers is None:
+        complex_loggers = []
     loggers_cfg = {}
     for logger in loggers:
-        if type(logger) == str:
-            loggers_cfg[logger] = {"handlers": [log_mode], "level": log_level, "propagate": False}
-        elif type(logger) == dict:
-            loggers_cfg[logger["name"]] = {
-                "handlers": [log_mode],
-                "level": logger["log_level"],
-                "propagate": False,
-            }
+        loggers_cfg[logger] = {"handlers": [log_mode], "level": log_level, "propagate": True}
+    for logger in complex_loggers:
+        loggers_cfg[logger["name"]] = {
+            "handlers": [log_mode],
+            "level": logger["log_level"],
+            "propagate": True,
+        }
     return loggers_cfg
 
 
 def initialize_logging(
-    loggers: List[str],
+    loggers: Optional[List[str]] = None,
+    complex_loggers: Optional[List[dict]] = None,
     structured_logs: bool = True,
     log_level: Optional[str] = Level.INFO,
     enrichers: Optional[List[Callable]] = None,
@@ -87,12 +91,13 @@ def initialize_logging(
     Python `logging` config dict schema: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
     Args:
         loggers: The loggers to be configured, e.g. ["py", "mylogger"]
+        complex_loggers: Loggers that need a specific log level
         structured_logs: Whether logs should be structured ('structured' vs. 'plain' in 'handlers')
         log_level: Log severity level
         enrichers: A list of callable enricher classes
     """
     log_mode = "structured" if structured_logs else "plain"
     logging_config = make_config(enrichers)
-    logging_config["loggers"] = configure_loggers(loggers, log_mode, log_level)
+    logging_config["loggers"] = configure_loggers(loggers, complex_loggers, log_mode, log_level)
     logging.config.dictConfig(logging_config)
     logging.captureWarnings(True)

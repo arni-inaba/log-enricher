@@ -24,7 +24,14 @@ functions that return a dictionary. When a log message is sent, the enrichers ar
 output is added to the log message, if structured logging is enabled.
 
 Furthermore, `initialize_logging()` takes a list of `loggers` to use, a switch to control `structured_logs` 
-(JSON logs, default on), and a `log_level` setting.
+(JSON logs, default on), and a global `log_level` setting. For simple configuration, a string with the name of the
+logger will do. If you want different log levels per logger, pass in a dictionary:
+```
+{
+    "name": "mylogger",
+    "log_level": "DEBUG"
+}
+```
 
 Logs will be output in a structured JSON format by default - if `structured_logs` is `True` - 
 or in a plain, console-friendly format if `structured_logs` is `False`.
@@ -48,7 +55,7 @@ extra_log_properties = {
 
 def main():
     initialize_logging(
-        loggers=["uvicorn", "sqlalchemy"],
+        loggers=["sqlalchemy", {"name": "uvicorn", "log_level": "DEBUG"}],
         structured_logs=os.environ.get("STRUCTURED_LOGS", True),
         log_level=Level.INFO,
         enrichers=[UserContextEnricher(), lambda: extra_log_properties],
