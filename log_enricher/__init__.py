@@ -62,10 +62,10 @@ class Level(StrEnum):
 
 
 def initialize_logging(
-    loggers: list[Union[str, tuple]],
+    loggers: List[Union[str, tuple]],
     structured_logs: bool = True,
     default_log_level: Optional[str] = Level.INFO,
-    enrichers: Optional[list[Callable]] = None,
+    enrichers: Optional[List[Callable]] = None,
 ) -> None:
     """
     Sets up the python `logging` module by calling logging.config.dictConfig:
