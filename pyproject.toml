@@ -19,6 +19,7 @@ mypy = "^0.931"
 flake8 = "^3.7"
 black = {version = "^18.3-alpha.0", allow-prereleases = true}
 pre-commit = "^1.20"
+typed-ast = "^1.5.3"
 [tool.black]
 line-length = 115
 target-version = ['py37']
