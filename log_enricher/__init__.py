@@ -2,7 +2,7 @@ import logging
 import logging.config
 import sys
 
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from strenum import StrEnum  # type: ignore
 
@@ -62,9 +62,9 @@ class Level(StrEnum):
 
 
 def initialize_logging(
-    loggers: List[str],
+    loggers: List[Union[str, tuple]],
     structured_logs: bool = True,
-    log_level: Optional[str] = Level.INFO,
+    default_log_level: Optional[str] = Level.INFO,
     enrichers: Optional[List[Callable]] = None,
 ) -> None:
     """
@@ -72,14 +72,18 @@ def initialize_logging(
     https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig
     Python `logging` config dict schema: https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
     Args:
-        loggers: The loggers to be configured, e.g. ["py", "mylogger"]
+        loggers: The loggers to be configured, e.g. ["py", "mylogger"]. Either a string or a tuple of logger, log_level.
         structured_logs: Whether logs should be structured ('structured' vs. 'plain' in 'handlers')
-        log_level: Log severity level
+        default_log_level: Default log severity level
         enrichers: A list of callable enricher classes
     """
     log_mode = "structured" if structured_logs else "plain"
     logging_config = make_config(enrichers)
     for logger in loggers:
+        log_level = default_log_level
+        if isinstance(logger, tuple):
+            logger, log_level = logger[0], logger[1]
+
         logging_config["loggers"][logger] = {"handlers": [log_mode], "level": log_level, "propagate": False}
     logging.config.dictConfig(logging_config)
     logging.captureWarnings(True)
