@@ -39,7 +39,7 @@ class ProcessID(Enricher):
 
 
 class Timestamp(Enricher):
-    """ Timestamp enrichers, adds an ISO-8601 timestamp to a log record with the attribute name 'timestamp'
+    """Timestamp enrichers, adds an ISO-8601 timestamp to a log record with the attribute name 'timestamp'
 
     Parameters:
     **kwargs (dict): keyword arguments passed into datetime.isoformat(**kwargs)
