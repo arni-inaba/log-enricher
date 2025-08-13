@@ -1,9 +1,10 @@
-version: 2
+version: 2.1
 jobs:
   build:
-    working_directory: ~/log-enricher
     docker:
-      - image: themattrix/tox
+      - image: cimg/python:3.12
+    working_directory: ~/log-enricher
     steps:
       - checkout
+      - run: python -m pip install --upgrade pip tox
       - run: tox
